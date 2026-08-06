@@ -6,6 +6,11 @@ spring:
     consul:
       host: ${URL_CONSUL:localhost}
       port: ${PORT_CONSUL:8500}
+    discovery:
+        health-check-path: /actuator/health
+        health-check-interval: 10s
+        instance-id: ${spring.application.name}:${random.value}
+        prefer-ip-address: true
 
     gateway:
       globalcors:
