@@ -1,0 +1,75 @@
+spring:
+  application:
+    name: api_gateway
+  
+  main:
+    web-application-type: reactive
+
+  cloud:
+    consul:
+      host: ${URL_CONSUL:localhost}
+      port: ${PORT_CONSUL:8500}
+    discovery:
+        health-check-path: /actuator/health
+        health-check-interval: 10s
+        instance-id: ${spring.application.name}:${random.value}
+        prefer-ip-address: true
+
+    gateway:
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "*" #Para produccion se coloca el dominio por seguridad
+            allowedHeaders: "*"
+            allowedMethods:
+              - GET
+              - POST
+              - PATCH
+              - PUT
+              - DELETE
+              - OPTIONS
+      
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+
+      routes:
+        - id: identityservice
+          uri: lb://ms-auth-identityservice
+          predicates:
+            - Path=/api/v1/**
+          filters:
+            - JwtGateway
+
+        - id: eventcategory
+          uri: lb://ms-event-category
+          predicates:
+            - Path=/api/v1/**
+          filters:
+            - JwtGateway
+
+        - id: enrollment
+          uri: lb://ms-enrollment
+          predicates:
+            - Path=/api/v1/**
+          filters:
+            - JwtGateway
+
+        - id: scoring
+          uri: lb://ms-scoring
+          predicates:
+            - Path=/api/v1/**
+          filters:
+            - JwtGateway
+
+        - id: notificationstreaming
+          uri: lb://ms-notification-streaming
+          predicates:
+            - Path=/api/v1/**
+          filters:
+            - JwtGateway
+
+security:
+  jwt:
+    secret-key: ${JWT_SECRET:F0bVQgRnuk6DRxooVWKaG0ndlgqEeI/4YXObXeOaR2Q=}
