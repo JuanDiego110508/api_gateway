@@ -12,17 +12,25 @@ import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
 @Component
-@RequiredArgsConstructor
-public class JwtGatewayFilterFactory
-        extends AbstractGatewayFilterFactory<Object> {
+public class JwtGatewayFilterFactory extends AbstractGatewayFilterFactory<JwtGatewayFilterFactory.Config> {
 
     private final JwtService jwtService;
 
+    public JwtGatewayFilterFactory(JwtService jwtService) {
+        super(Config.class);
+        this.jwtService = jwtService;
+    }
     @Override
-    public GatewayFilter apply(Object config) {
-
+    public GatewayFilter apply(Config config) {
         return (exchange, chain) -> {
+            String path = exchange.getRequest().getURI().getPath();
 
+            // 1. Omitir validación de JWT si la petición va hacia actuator o health check (puedes agregar /auth/ aquí si lo necesitas)
+            if (path.startsWith("/actuator") || path.startsWith("/api/v1/auth")) {
+                return chain.filter(exchange);
+            }
+
+            // 2. Validar presencia del token Authorization
             String authorization = exchange.getRequest().getHeaders().getFirst("Authorization");
 
             if (authorization == null || !authorization.startsWith("Bearer ")) {
@@ -49,8 +57,12 @@ public class JwtGatewayFilterFactory
     }
 
     private Mono<Void> unauthorized(ServerWebExchange exchange) {
-
         exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
         return exchange.getResponse().setComplete();
+    }
+
+    // Clase de configuración requerida por AbstractGatewayFilterFactory
+    public static class Config {
+        // Puedes agregar propiedades de configuración si las necesitas en el futuro
     }
 }
