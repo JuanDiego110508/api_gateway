@@ -51,7 +51,7 @@ spring:
             - id: eventcategory
               uri: lb://ms-event-category
               predicates:
-                - Path=/api/v1/events/**
+                - Path=/api/v1/events/**,/api/v1/modality/**
               filters:
                 - Jwt
 
