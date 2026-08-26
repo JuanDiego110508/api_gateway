@@ -26,7 +26,7 @@ public class JwtGatewayFilterFactory extends AbstractGatewayFilterFactory<JwtGat
             String path = exchange.getRequest().getURI().getPath();
 
             // 1. Omitir validación de JWT si la petición va hacia actuator o health check (puedes agregar /auth/ aquí si lo necesitas)
-            if (path.startsWith("/actuator") || path.startsWith("/api/auth")) {
+            if (path.startsWith("/actuator") || path.startsWith("/api/v1/auth")) {
                 return chain.filter(exchange);
             }
 

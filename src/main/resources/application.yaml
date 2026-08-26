@@ -4,7 +4,7 @@ server:
 spring:
   application:
     name: api-gateway
-  
+
   main:
     web-application-type: reactive
 
@@ -20,65 +20,56 @@ spring:
         service-name: api-gateway
 
     gateway:
-      globalcors:
-        corsConfigurations:
-          '[/**]':
-            allowedOrigins: "*" # Para producción se coloca el dominio por seguridad
-            allowedHeaders: "*"
-            allowedMethods:
-              - GET
-              - POST
-              - PATCH
-              - PUT
-              - DELETE
-              - OPTIONS
-      
-      discovery:
-        locator:
-          enabled: true
-          lower-case-service-id: true
+      server:
+        webflux:
+          globalcors:
+            corsConfigurations:
+              '[/**]':
+                allowedOrigins: "*"
+                allowedHeaders: "*"
+                allowedMethods:
+                  - GET
+                  - POST
+                  - PATCH
+                  - PUT
+                  - DELETE
+                  - OPTIONS
 
-      routes:
-        - id: identityservice
-          uri: lb://ms-auth-identityservice
-          predicates:
-            - Path=/api/v1/auth/**, /api/v1/users/**
-          filters:
-            - JwtGatewayFilterFactory
+          discovery:
+            locator:
+              enabled: true
+              lower-case-service-id: true
 
-        - id: eventcategory
-          uri: lb://ms-event-category
-          predicates:
-            - Path=/api/v1/events/**
-          filters:
-            - JwtGatewayFilterFactory
+          routes:
+            - id: identityservice
+              uri: lb://ms-auth-identityservice
+              predicates:
+                - Path=/api/v1/auth/**,/api/v1/users/**
+              filters:
+                - Jwt
 
-        - id: enrollment
-          uri: lb://ms-enrollment
-          predicates:
-            - Path=/api/v1/enrollments/**
-          filters:
-            - JwtGatewayFilterFactory
+            - id: eventcategory
+              uri: lb://ms-event-category
+              predicates:
+                - Path=/api/v1/events/**
+              filters:
+                - Jwt
 
-        - id: scoring
-          uri: lb://ms-scoring
-          predicates:
-            - Path=/api/v1/scores/**
-          filters:
-            - JwtGatewayFilterFactory
-
-        - id: notificationstreaming
-          uri: lb://ms-notification-streaming
-          predicates:
-            - Path=/api/v1/notifications/**
-          filters:
-            - JwtGatewayFilterFactory
+            - id: enrollment
+              uri: lb://ms-enrollment
+              predicates:
+                - Path=/api/v1/enrollments/**
+              filters:
+                - Jwt
 
 management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,gateway
+  endpoint:
+    gateway:
+      access: unrestricted
 
 security:
   jwt:
