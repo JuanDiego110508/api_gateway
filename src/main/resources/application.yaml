@@ -61,6 +61,13 @@ spring:
                 - Path=/api/v1/enrollments/**
               filters:
                 - Jwt
+              
+            - id: scoring
+              uri: lb://ms-scoring
+              predicates:
+                - Path=/api/v1/scoring/**
+              filters:
+                - Jwt
 
 management:
   endpoints:
