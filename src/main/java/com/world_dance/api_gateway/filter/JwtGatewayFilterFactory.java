@@ -8,7 +8,6 @@ import org.springframework.web.server.ServerWebExchange;
 
 import com.world_dance.api_gateway.service.JwtService;
 
-import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
 @Component
@@ -25,8 +24,8 @@ public class JwtGatewayFilterFactory extends AbstractGatewayFilterFactory<JwtGat
         return (exchange, chain) -> {
             String path = exchange.getRequest().getURI().getPath();
 
-            // 1. Omitir validación de JWT si la petición va hacia actuator o health check (puedes agregar /auth/ aquí si lo necesitas)
-            if (path.startsWith("/actuator") || path.startsWith("/api/v1/auth")) {
+            // 1. Omitir validación de JWT para rutas públicas o de integración externa
+            if (path.startsWith("/actuator") || path.startsWith("/api/v1/auth") || path.startsWith("/api/v1/stream/oauth")) {
                 return chain.filter(exchange);
             }
 

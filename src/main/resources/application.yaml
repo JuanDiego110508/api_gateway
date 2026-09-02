@@ -8,6 +8,12 @@ spring:
   main:
     web-application-type: reactive
 
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+
   cloud:
     consul:
       host: ${URL_CONSUL:localhost}
@@ -66,6 +72,13 @@ spring:
               uri: lb://ms-scoring
               predicates:
                 - Path=/api/v1/scoring/**
+              filters:
+                - Jwt
+
+            - id: notification-streaming
+              uri: lb://ms-notification-streaming
+              predicates:
+                - Path=/api/v1/stream/**
               filters:
                 - Jwt
 
