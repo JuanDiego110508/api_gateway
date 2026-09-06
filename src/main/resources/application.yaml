@@ -82,6 +82,13 @@ spring:
               filters:
                 - Jwt
 
+            - id: music-media
+              uri: lb://ms-music-media
+              predicates:
+                - Path=/api/v1/music/**
+              filters:
+                - Jwt
+
 management:
   endpoints:
     web:
