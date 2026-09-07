@@ -25,7 +25,10 @@ public class JwtGatewayFilterFactory extends AbstractGatewayFilterFactory<JwtGat
             String path = exchange.getRequest().getURI().getPath();
 
             // 1. Omitir validación de JWT para rutas públicas o de integración externa
-            if (path.startsWith("/actuator") || path.startsWith("/api/v1/auth") || path.startsWith("/api/v1/stream/oauth")) {
+            if (path.startsWith("/actuator") || 
+            path.startsWith("/api/v1/auth") || 
+            path.startsWith("/api/v1/stream/oauth")|| 
+            path.startsWith("/rtc/**")) {
                 return chain.filter(exchange);
             }
 
