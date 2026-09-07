@@ -74,6 +74,12 @@ spring:
                 - Path=/api/v1/scoring/**
               filters:
                 - Jwt
+            - id: scheduling
+              uri: lb://ms-scheduling
+              predicates:
+                - Path=/api/v1/scheduling/**
+              filters:
+                - Jwt
 
             - id: notification-streaming
               uri: lb://ms-notification-streaming
@@ -81,6 +87,19 @@ spring:
                 - Path=/api/v1/stream/**
               filters:
                 - Jwt
+
+            - id: srs-whip-ingest
+              uri: http://wd-srs-media-server:1985
+              predicates:
+                - Path=/rtc/v1/whip/**
+
+         
+            - id: srs-api
+              uri: http://wd-srs-media-server:1985
+              predicates:
+                - Path=/srs-api/**
+              filters:
+                - StripPrefix=1
 
             - id: music-media
               uri: lb://ms-music-media
