@@ -28,6 +28,16 @@ spring:
     gateway:
       server:
         webflux:
+          # El límite por defecto de Reactor Netty para frames de WebSocket es 65536 bytes (64KB);
+          # los chunks WebM de MediaRecorder de la ingesta de streaming lo superan y el gateway
+          # cierra la conexión con code 1009 ("Max frame length exceeded"). Esta propiedad cubre
+          # ambos sentidos del proxy WS: navegador -> gateway (HandshakeWebSocketService) y
+          # gateway -> ffmpeg-manager (cliente Netty saliente), ambos configurados a partir de la
+          # misma HttpClientProperties.Websocket.
+          httpclient:
+            websocket:
+              max-frame-payload-length: 10485760
+
           globalcors:
             corsConfigurations:
               '[/**]':
@@ -92,14 +102,26 @@ spring:
               uri: http://wd-srs-media-server:1985
               predicates:
                 - Path=/rtc/v1/whip/**
+              filters:
+                # SRS (crossdomain on) ya agrega Access-Control-Allow-Origin; sin esto, el globalcors
+                # de abajo lo duplica y el navegador rechaza la respuesta ("*, *" no es válido).
+                - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_FIRST
 
-         
             - id: srs-api
               uri: http://wd-srs-media-server:1985
               predicates:
                 - Path=/srs-api/**
               filters:
                 - StripPrefix=1
+                - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_FIRST
+
+            # Ingesta de cámara/pantalla por WebSocket (TCP puro): reemplaza el WHIP/WebRTC directo a
+            # SRS porque el túnel de Cloudflare descarta el UDP de ICE. Reactor Netty detecta el
+            # header "Upgrade: websocket" y reenvía como ws:// automáticamente a esta misma uri http://.
+            - id: ffmpeg-ws-ingest
+              uri: http://ffmpeg-manager:3000
+              predicates:
+                - Path=/ws/ingest/**
 
             - id: music-media
               uri: lb://ms-music-media
