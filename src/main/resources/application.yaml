@@ -130,6 +130,13 @@ spring:
               filters:
                 - Jwt
 
+            - id: reporting-analytics
+              uri: lb://ms-reporting-analytics-service
+              predicates:
+                - Path=/api/v1/reports/**
+              filters:
+                - Jwt
+
 management:
   endpoints:
     web:
