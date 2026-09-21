@@ -137,6 +137,18 @@ spring:
               filters:
                 - Jwt
 
+            # Agente IA (service-agentia-backend, Flask): no está registrado en Consul y
+            # no requiere JWT propio (usa su propia cuenta de servicio contra los demás
+            # microservicios). Sin filtro Jwt para que cualquier visitante pueda usar el
+            # chat aunque no haya iniciado sesión. StripPrefix=3 quita "/api/v1/agent" y
+            # deja la ruta real del backend (ej. /api/chat, /api/status).
+            - id: agentia
+              uri: http://service-agentia-backend:5000
+              predicates:
+                - Path=/api/v1/agent/**
+              filters:
+                - StripPrefix=3
+
 management:
   endpoints:
     web:
